@@ -36,6 +36,9 @@
         <sqlite.jdbc.version>3.49.1.0</sqlite.jdbc.version>
         <guice.version>7.0.0</guice.version>
         <hikaricp.version>6.3.0</hikaricp.version>
+        <!-- SLF4J : doit rester aligne sur le slf4j-api tire transitivement par
+             HikariCP (1.7.36). Le binding NOP supprime le message d'init SLF4J. -->
+        <slf4j.version>1.7.36</slf4j.version>
 
         <!-- Test dependencies versions -->
         <junit.jupiter.version>6.0.3</junit.jupiter.version>
@@ -87,6 +90,16 @@
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>${hikaricp.version}</version>
+        </dependency>
+
+        <!-- SLF4J NOP : binding "silencieux". HikariCP utilise SLF4J ; sans binding,
+             SLF4J affiche au demarrage "Failed to load StaticLoggerBinder / NOP logger".
+             Le binding NOP fournit org.slf4j.impl.StaticLoggerBinder et neutralise tous
+             les logs. Module JPMS stable org.slf4j.nop, declare dans module-info.java. -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
 
         <!-- JUnit 5 -->
@@ -184,6 +197,7 @@
                     <mainClass>${javafx.mainClass}</mainClass>
                     <options>
                         <option>--enable-native-access=javafx.graphics</option>
+                        <option>--enable-native-access=org.xerial.sqlitejdbc</option>
                     </options>
                 </configuration>
             </plugin>
@@ -227,6 +241,7 @@
                     <argLine>
                         --enable-native-access=ALL-UNNAMED
                         --enable-native-access=javafx.graphics
+                        --enable-native-access=org.xerial.sqlitejdbc
                         --add-reads javafx.graphics=ALL-UNNAMED
                         --add-opens javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
                         --add-opens javafx.base/com.sun.javafx.runtime=ALL-UNNAMED
@@ -250,9 +265,9 @@
                         <googleJavaFormat>
                             <version>${google.java.format.version}</version>
                         </googleJavaFormat>
-                        <removeUnusedImports/>
-                        <trimTrailingWhitespace/>
-                        <endWithNewline/>
+                        <removeUnusedImports />
+                        <trimTrailingWhitespace />
+                        <endWithNewline />
                     </java>
                 </configuration>
             </plugin>
