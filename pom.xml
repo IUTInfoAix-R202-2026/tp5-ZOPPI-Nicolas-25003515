@@ -19,7 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Java & JavaFX versions -->
-        <maven.compiler.release>24</maven.compiler.release>
+        <maven.compiler.release>25</maven.compiler.release>
         <javafx.version>26</javafx.version>
         <javafx.mainClass>tp5.javafx/fr.univ_amu.iut.App</javafx.mainClass>
 
@@ -198,6 +198,8 @@
                     <options>
                         <option>--enable-native-access=javafx.graphics</option>
                         <option>--enable-native-access=org.xerial.sqlitejdbc</option>
+                        <!-- Neutralise le WARNING sun.misc.Unsafe de Guice/Guava (JEP 498). -->
+                        <option>--sun-misc-unsafe-memory-access=allow</option>
                     </options>
                 </configuration>
             </plugin>
@@ -238,17 +240,19 @@
                         <java.awt.headless>true</java.awt.headless>
                         <testfx.robot>glass</testfx.robot>
                     </systemPropertyVariables>
-                    <argLine>
-                        --enable-native-access=ALL-UNNAMED
-                        --enable-native-access=javafx.graphics
-                        --enable-native-access=org.xerial.sqlitejdbc
-                        --add-reads javafx.graphics=ALL-UNNAMED
-                        --add-opens javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
-                        --add-opens javafx.base/com.sun.javafx.runtime=ALL-UNNAMED
-                        --add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
-                        --add-exports javafx.graphics/com.sun.javafx.util=ALL-UNNAMED
-                        --add-exports javafx.base/com.sun.javafx.logging=ALL-UNNAMED
-                    </argLine>
+                    <!-- En mode classpath (useModulePath=false ci-dessus), JavaFX et SQLite
+                         sont charges dans le module *unnamed* : les modules nommes javafx.graphics,
+                         javafx.base et org.xerial.sqlitejdbc n'existent pas dans le graphe. Tout
+                         flag add-reads / add-exports / add-opens ou enable-native-access qui les
+                         cible declenche "WARNING: Unknown module ..." et reste sans effet (les
+                         classes com.sun.javafx.* de l'unnamed sont deja ouvertes/accessibles). On
+                         ne garde donc que ALL-UNNAMED, seule cible active, qui couvre l'acces natif
+                         du JavaFX headless et du driver JNI SQLite.
+                         On ajoute sun-misc-unsafe-memory-access=allow (JEP 498, Java 24+) pour
+                         neutraliser les "WARNING: sun.misc.Unsafe" emis par Guice (HiddenClassDefiner,
+                         staticFieldBase) et Guava (AbstractFuture, objectFieldOffset), deux
+                         dependances transitives non maitrisees et deja en derniere version. -->
+                    <argLine>--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow</argLine>
                 </configuration>
             </plugin>
 
