@@ -19,7 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Java & JavaFX versions -->
-        <maven.compiler.release>25</maven.compiler.release>
+        <maven.compiler.release>24</maven.compiler.release>
         <javafx.version>26</javafx.version>
         <javafx.mainClass>tp5.javafx/fr.univ_amu.iut.App</javafx.mainClass>
 

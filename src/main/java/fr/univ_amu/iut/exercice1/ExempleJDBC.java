@@ -38,6 +38,7 @@ public class ExempleJDBC {
       creerEtRemplirTable(connexion);
 
       System.out.println("Taxons présents dans la base :");
+      // Vous auriez du ecrire "taxons les riches"
       for (String ligne : lireTaxons(connexion)) {
         System.out.println("  " + ligne);
       }
@@ -73,6 +74,12 @@ public class ExempleJDBC {
     // 3. Parcourir le ResultSet avec while (rs.next()) et, pour chaque ligne, ajouter à `lignes`
     //    la chaîne : rs.getString("code") + " - " + rs.getString("nom_vernaculaire").
 
+    try (Statement st = connexion.createStatement()) {
+      ResultSet rs = st.executeQuery("SELECT code, nom_vernaculaire FROM taxon");
+      while (rs.next()) {
+        lignes.add(rs.getString("code") + " - " + rs.getString("nom_vernaculaire"));
+      }
+    }
     return lignes;
   }
 }
